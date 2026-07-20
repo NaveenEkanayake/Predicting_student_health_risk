@@ -5,11 +5,19 @@ import '../styles/globals.css';
 export const metadata = {
   title: 'HealthPredict — Student Wellness Dashboard',
   description: 'Monitor and predict student health conditions using AI & ML',
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+      </head>
       <body className="bg-gray-50 antialiased">
         <AuthProvider>
           {children}

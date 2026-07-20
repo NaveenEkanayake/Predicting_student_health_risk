@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { Activity, Mail, Lock, User, Eye, EyeOff, Heart, Sparkles, CheckCircle, AlertTriangle, AlertCircle } from 'lucide-react';
+import BrandLoader from '../components/BrandLoader';
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -12,6 +13,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [focusedField, setFocusedField] = useState(null);
+  const [redirecting, setRedirecting] = useState(false);
   const { login, register, isAuthenticated } = useAuth();
   const router = useRouter();
 
@@ -24,6 +26,7 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    const start = Date.now();
     try {
       if (isLogin) {
         await login(form.email, form.password);
@@ -32,11 +35,16 @@ export default function LoginPage() {
         await register(form.name, form.email, form.password);
         toast.success('Account created!');
       }
-      router.push('/dashboard');
+      setRedirecting(true);
+      const elapsed = Date.now() - start;
+      const delay = Math.max(0, 1500 - elapsed);
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, delay);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Something went wrong.');
-    } finally {
       setLoading(false);
+      setRedirecting(false);
     }
   };
 
@@ -44,6 +52,10 @@ export default function LoginPage() {
     `w-full pl-10 pr-12 py-3.5 rounded-xl border-2 bg-white/80 backdrop-blur-sm text-sm outline-none transition-all duration-300
     ${focusedField === field ? 'border-indigo-500 shadow-lg shadow-indigo-500/10 scale-[1.01]' : 'border-gray-200 hover:border-gray-300'}
     ${form[field] && !focusedField ? 'border-indigo-300 bg-indigo-50/30' : ''}`;
+
+  if (redirecting) {
+    return <BrandLoader text="Signing in... Opening Dashboard" />;
+  }
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-indigo-50 via-white to-purple-50">
@@ -56,7 +68,7 @@ export default function LoginPage() {
           {/* Logo */}
           <div className="flex items-center gap-3 mb-10">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 animate-glow">
-              <Heart className="w-6 h-6 text-white" />
+              <Activity className="w-6 h-6 text-white" />
             </div>
             <div>
               <h1 className="text-2xl font-extrabold gradient-text">HealthPredict</h1>
@@ -71,8 +83,8 @@ export default function LoginPage() {
             </h2>
             <p className="text-gray-500 mb-8 text-sm">
               {isLogin
-                ? 'Sign in as a Teacher or Parent to monitor student health'
-                : 'Register as a Teacher or Parent to start tracking student wellness'}
+                ? 'Sign in as Medical Personnel or Health Officer to monitor student wellness'
+                : 'Register as Medical Personnel or Health Officer to start tracking student wellness'}
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-5">

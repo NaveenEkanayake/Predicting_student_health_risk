@@ -80,7 +80,7 @@ export default function Sidebar() {
                 <h2 className="text-white font-extrabold text-sm tracking-tight">HealthPredict</h2>
                 <Sparkles className="w-3 h-3 text-indigo-400" />
               </div>
-              <p className="text-white/30 text-[10px] uppercase tracking-wider">Teacher Dashboard</p>
+              <p className="text-white/30 text-[10px] uppercase tracking-wider">Medical Officer Portal</p>
             </div>
           )}
         </div>

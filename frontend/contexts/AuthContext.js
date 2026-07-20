@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import BrandLoader from '../components/BrandLoader';
 
 const AuthContext = createContext(null);
 
@@ -12,8 +13,8 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  // ── Hydrate from localStorage on mount ──────────────────────────────
   useEffect(() => {
+    const start = Date.now();
     const storedToken = localStorage.getItem('health_token');
     const storedUser = localStorage.getItem('health_user');
 
@@ -22,7 +23,9 @@ export function AuthProvider({ children }) {
       setUser(JSON.parse(storedUser));
       axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
     }
-    setLoading(false);
+    const elapsed = Date.now() - start;
+    const delay = Math.max(0, 1200 - elapsed);
+    setTimeout(() => setLoading(false), delay);
   }, []);
 
   // ── Login ──────────────────────────────────────────────────────────
@@ -55,14 +58,17 @@ export function AuthProvider({ children }) {
     return data;
   }, []);
 
-  // ── Logout ─────────────────────────────────────────────────────────
   const logout = useCallback(() => {
+    setLoading(true);
     localStorage.removeItem('health_token');
     localStorage.removeItem('health_user');
     setToken(null);
     setUser(null);
     delete axios.defaults.headers.common['Authorization'];
-    router.push('/');
+    setTimeout(() => {
+      router.push('/');
+      setTimeout(() => setLoading(false), 500);
+    }, 1000);
   }, [router]);
 
   const value = {
@@ -75,7 +81,11 @@ export function AuthProvider({ children }) {
     logout,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {loading ? <BrandLoader text="Initializing Student Wellness Dashboard..." /> : children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {

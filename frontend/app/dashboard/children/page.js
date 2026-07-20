@@ -5,9 +5,11 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import PredictionCard from '../../../components/PredictionCard';
 import AISuggestion from '../../../components/AISuggestion';
+import { generateStudentPdfReport } from '../../../utils/generatePdf';
 import {
   UserPlus, Trash2, Activity, RefreshCw, ChevronDown, ChevronUp,
   Plus, Brain, Loader2, Calculator, Users, Sparkles, AlertTriangle,
+  FileText, Download,
 } from 'lucide-react';
 
 export default function ChildrenPage() {
@@ -22,6 +24,7 @@ export default function ChildrenPage() {
   const [aiSuggestion, setAiSuggestion] = useState(null);
   const [showResult, setShowResult] = useState(false);
   const [animatedResult, setAnimatedResult] = useState(false);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
 
   // Add child form
   const [newName, setNewName] = useState('');
@@ -105,6 +108,26 @@ export default function ChildrenPage() {
       toast.success('Prediction complete!');
       fetchChildren();
     } catch (err) { toast.error(err.response?.data?.message || 'Prediction failed'); } finally { setPredicting(false); }
+  };
+
+  // ── Download PDF Report ──────────────────────────────────────────────
+  const handleExportPdf = async () => {
+    if (!selectedChild || !prediction) return;
+    setDownloadingPdf(true);
+    try {
+      await generateStudentPdfReport({
+        student: selectedChild,
+        prediction,
+        aiSuggestion,
+        habitData: habitForm,
+      });
+      toast.success('PDF Health Report downloaded!');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to generate PDF Report');
+    } finally {
+      setDownloadingPdf(false);
+    }
   };
 
   // ── Helpers ──────────────────────────────────────────────────────────
@@ -342,6 +365,23 @@ export default function ChildrenPage() {
                 {/* Results */}
                 {showResult && (
                   <div className={`space-y-5 transition-all duration-500 ${animatedResult ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                    <div className="flex justify-end">
+                      <button onClick={handleExportPdf} disabled={downloadingPdf}
+                        className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-sm shadow-lg shadow-indigo-500/20 hover:shadow-xl hover:shadow-indigo-500/30 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50">
+                        {downloadingPdf ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Generating PDF...
+                          </>
+                        ) : (
+                          <>
+                            <FileText className="w-4 h-4" />
+                            Download PDF Report
+                            <Download className="w-3.5 h-3.5 opacity-80 ml-0.5" />
+                          </>
+                        )}
+                      </button>
+                    </div>
                     <PredictionCard prediction={prediction} />
                     <AISuggestion suggestion={aiSuggestion} />
                   </div>
