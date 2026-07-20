@@ -7,7 +7,7 @@ import PredictionCard from '../../../components/PredictionCard';
 import AISuggestion from '../../../components/AISuggestion';
 import {
   UserPlus, Trash2, Activity, RefreshCw, ChevronDown, ChevronUp,
-  Plus, Brain, Loader2, Calculator, Users, Sparkles,
+  Plus, Brain, Loader2, Calculator, Users, Sparkles, AlertTriangle,
 } from 'lucide-react';
 
 export default function ChildrenPage() {
@@ -29,6 +29,10 @@ export default function ChildrenPage() {
   const [newGender, setNewGender] = useState('');
   const [adding, setAdding] = useState(false);
 
+  // Delete modal state
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
   // Prediction form
   const [habitForm, setHabitForm] = useState({
     sleepDuration: '', dailySteps: '', dietQuality: '',
@@ -36,7 +40,7 @@ export default function ChildrenPage() {
 
   // ── Fetch ────────────────────────────────────────────────────────────
   const fetchChildren = useCallback(async () => {
-    try { setLoading(true); const { data } = await axios.get('/api/children'); setChildren(data.children); } catch { toast.error('Failed to load children'); } finally { setLoading(false); }
+    try { setLoading(true); const { data } = await axios.get('/api/children'); setChildren(data.children); } catch { toast.error('Failed to load students'); } finally { setLoading(false); }
   }, []);
 
   useEffect(() => { fetchChildren(); }, [fetchChildren]);
@@ -55,9 +59,20 @@ export default function ChildrenPage() {
   };
 
   // ── Delete ───────────────────────────────────────────────────────────
-  const handleDelete = async (id, name) => {
-    if (!window.confirm(`Remove ${name}?`)) return;
-    try { await axios.delete(`/api/children/${id}`); toast.success(`${name} removed`); fetchChildren(); if (selectedChild?._id === id) resetSelection(); } catch { toast.error('Delete failed'); }
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await axios.delete(`/api/children/${deleteTarget.id}`);
+      toast.success(`${deleteTarget.name} deleted successfully`);
+      fetchChildren();
+      if (selectedChild?._id === deleteTarget.id) resetSelection();
+      setDeleteTarget(null);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Delete failed');
+    } finally {
+      setDeleting(false);
+    }
   };
 
   // ── Select ───────────────────────────────────────────────────────────
@@ -114,8 +129,8 @@ export default function ChildrenPage() {
               <Users className="w-4 h-4" />
               <span>Management</span>
             </div>
-            <h1 className="text-3xl lg:text-4xl font-extrabold text-white mb-2">Children List</h1>
-            <p className="text-white/70 text-sm lg:text-base">Manage children and run health predictions</p>
+            <h1 className="text-3xl lg:text-4xl font-extrabold text-white mb-2">Students List</h1>
+            <p className="text-white/70 text-sm lg:text-base">Manage students and run health predictions</p>
           </div>
           <div className="flex items-center gap-3">
             <button onClick={fetchChildren} disabled={loading}
@@ -124,7 +139,7 @@ export default function ChildrenPage() {
             </button>
             <button onClick={() => setShowAddModal(true)}
               className="flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-indigo-600 font-semibold text-sm hover:shadow-xl hover:shadow-black/10 active:scale-[0.98] transition-all">
-              <UserPlus className="w-4 h-4" /> Add Child
+              <UserPlus className="w-4 h-4" /> Add Student
             </button>
           </div>
         </div>
@@ -132,15 +147,15 @@ export default function ChildrenPage() {
 
       <div className="p-6 lg:p-8 -mt-6 relative z-20">
         <div className="grid lg:grid-cols-5 gap-6">
-          {/* ── LEFT: Children List ──────────────────────────────────── */}
+          {/* ── LEFT: Students List ──────────────────────────────────── */}
           <div className="lg:col-span-2">
             <div className="glass rounded-2xl overflow-hidden shadow-lg">
               <div className="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-white to-gray-50/80">
                 <h2 className="font-bold text-gray-900 flex items-center gap-2">
                   <ChildIcon className="w-4 h-4 text-indigo-500" />
-                  Your Children
+                  Your Students
                 </h2>
-                <p className="text-xs text-gray-400 mt-0.5 ml-6">Click a child to predict</p>
+                <p className="text-xs text-gray-400 mt-0.5 ml-6">Click a student to predict</p>
               </div>
               <div className="divide-y divide-gray-50 max-h-[600px] overflow-y-auto">
                 {loading ? (
@@ -150,8 +165,8 @@ export default function ChildrenPage() {
                     <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
                       <Users className="w-7 h-7 text-gray-400" />
                     </div>
-                    <p className="font-semibold text-gray-600">No children added</p>
-                    <p className="text-sm text-gray-400 mt-1">Click &quot;Add Child&quot; to get started</p>
+                    <p className="font-semibold text-gray-600">No students added</p>
+                    <p className="text-sm text-gray-400 mt-1">Click &quot;Add Student&quot; to get started</p>
                   </div>
                 ) : (
                   children.map((child, idx) => {
@@ -192,8 +207,9 @@ export default function ChildrenPage() {
                               {child.predictionCount}
                             </span>
                           )}
-                          <button onClick={(e) => { e.stopPropagation(); handleDelete(child._id, child.name); }}
-                            className="p-2 rounded-xl text-gray-300 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all">
+                          <button onClick={(e) => { e.stopPropagation(); setDeleteTarget({ id: child._id, name: child.name }); }}
+                            className="p-2 rounded-xl text-gray-300 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all"
+                            title="Delete student">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
@@ -212,8 +228,8 @@ export default function ChildrenPage() {
                 <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
                   <Calculator className="w-10 h-10 text-indigo-400" />
                 </div>
-                <h3 className="text-2xl font-extrabold text-gray-900 mb-3">Select a Child</h3>
-                <p className="text-gray-500 max-w-sm mx-auto">Click on a child from the list to view their details and run a health prediction</p>
+                <h3 className="text-2xl font-extrabold text-gray-900 mb-3">Select a Student</h3>
+                <p className="text-gray-500 max-w-sm mx-auto">Click on a student from the list to view their details and run a health prediction</p>
               </div>
             ) : (
               <>
@@ -296,9 +312,9 @@ export default function ChildrenPage() {
                           onChange={(e) => setHabitForm({ ...habitForm, dietQuality: e.target.value })}
                           className={inputClass} required>
                           <option value="">Select diet quality...</option>
-                          <option value="Good" className="text-green-600">🥗 Good</option>
-                          <option value="Average" className="text-amber-600">🍛 Average</option>
-                          <option value="Poor" className="text-red-600">🍔 Poor</option>
+                          <option value="Good" className="text-green-600">Good</option>
+                          <option value="Average" className="text-amber-600">Average</option>
+                          <option value="Poor" className="text-red-600">Poor</option>
                         </select>
                       </div>
                     </div>
@@ -352,13 +368,13 @@ export default function ChildrenPage() {
                 <Plus className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-extrabold text-gray-900">Add New Child</h2>
-                <p className="text-xs text-gray-400">Enter your child&apos;s details</p>
+                <h2 className="text-xl font-extrabold text-gray-900">Add New Student</h2>
+                <p className="text-xs text-gray-400">Enter student&apos;s details</p>
               </div>
             </div>
             <form onSubmit={handleAdd} className="space-y-5">
               <div>
-                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Child&apos;s Name</label>
+                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Student&apos;s Name</label>
                 <input type="text" value={newName} onChange={(e) => setNewName(e.target.value)}
                   placeholder="Full name" required
                   className="w-full px-4 py-3.5 rounded-2xl border-2 border-gray-200 bg-white/80 backdrop-blur-sm text-sm outline-none transition-all focus:border-indigo-500 focus:shadow-lg focus:shadow-indigo-500/10" />
@@ -384,10 +400,49 @@ export default function ChildrenPage() {
                   className="flex-1 py-3.5 rounded-2xl border-2 border-gray-200 text-gray-700 font-bold text-sm hover:bg-gray-50 transition-all hover:border-gray-300">Cancel</button>
                 <button type="submit" disabled={adding}
                   className="flex-1 py-3.5 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold text-sm shadow-lg shadow-indigo-500/25 hover:shadow-xl active:scale-[0.98] transition-all disabled:opacity-50">
-                  {adding ? <span className="flex items-center justify-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Adding...</span> : 'Add Child'}
+                  {adding ? <span className="flex items-center justify-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Adding...</span> : 'Add Student'}
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* ── Smooth Delete Confirmation Modal ──────────────────────────── */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={() => !deleting && setDeleteTarget(null)} />
+          <div className="relative w-full max-w-md glass rounded-3xl shadow-2xl p-8 lg:p-10 animate-scale-in border border-red-100/60">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center shadow-lg shadow-red-500/30 flex-shrink-0 animate-pulse-soft">
+                <AlertTriangle className="w-7 h-7 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-extrabold text-gray-900">Delete Student</h2>
+                <p className="text-xs text-red-500 font-semibold tracking-wide uppercase">Permanent Removal</p>
+              </div>
+            </div>
+
+            <p className="text-sm text-gray-600 leading-relaxed mb-8">
+              Are you sure you want to remove <span className="font-extrabold text-gray-900">{deleteTarget.name}</span> from the database? All associated health records and prediction history will be permanently deleted.
+            </p>
+
+            <div className="flex gap-3">
+              <button type="button" onClick={() => setDeleteTarget(null)} disabled={deleting}
+                className="flex-1 py-3.5 rounded-2xl border-2 border-gray-200 text-gray-700 font-bold text-sm hover:bg-gray-50 transition-all hover:border-gray-300 disabled:opacity-50">
+                Cancel
+              </button>
+              <button type="button" onClick={confirmDelete} disabled={deleting}
+                className="flex-1 py-3.5 rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 text-white font-bold text-sm shadow-lg shadow-red-500/25 hover:shadow-xl hover:shadow-red-500/35 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                {deleting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  'Delete Student'
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

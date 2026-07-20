@@ -34,12 +34,12 @@ app.use((err, _req, res, _next) => {
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => {
-    console.log('✅ Connected to MongoDB Atlas — database: student_health');
+    console.log('[INFO] Connected to MongoDB Atlas - database: student_health');
     app.listen(PORT, () => {
-      console.log(`✅ Server listening on http://localhost:${PORT}`);
+      console.log(`[INFO] Server listening on http://localhost:${PORT}`);
     });
   })
   .catch((err) => {
-    console.error('❌ MongoDB connection failed:', err.message);
+    console.error('[ERROR] MongoDB connection failed:', err.message);
     process.exit(1);
   });

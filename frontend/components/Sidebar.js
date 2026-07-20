@@ -17,7 +17,7 @@ import {
 
 const navItems = [
   { label: 'Overview', href: '/dashboard', icon: LayoutDashboard, desc: 'Analytics & charts' },
-  { label: 'Children List', href: '/dashboard/children', icon: Users, desc: 'Manage & predict' },
+  { label: 'Students List', href: '/dashboard/children', icon: Users, desc: 'Manage & predict' },
 ];
 
 export default function Sidebar() {
@@ -80,7 +80,7 @@ export default function Sidebar() {
                 <h2 className="text-white font-extrabold text-sm tracking-tight">HealthPredict</h2>
                 <Sparkles className="w-3 h-3 text-indigo-400" />
               </div>
-              <p className="text-white/30 text-[10px] uppercase tracking-wider">Parent Dashboard</p>
+              <p className="text-white/30 text-[10px] uppercase tracking-wider">Teacher Dashboard</p>
             </div>
           )}
         </div>

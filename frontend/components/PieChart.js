@@ -17,7 +17,7 @@ const CustomTooltip = ({ active, payload }) => {
           <p className="font-bold text-sm">{d.name}</p>
         </div>
         <p className="text-gray-300">
-          <span className="text-white font-bold text-base">{d.value}</span> children
+          <span className="text-white font-bold text-base">{d.value}</span> students
         </p>
         <div className="mt-2 w-full h-1.5 bg-gray-700 rounded-full overflow-hidden">
           <div className={`h-full rounded-full bg-gradient-to-r ${GRADIENTS[d.name]}`}

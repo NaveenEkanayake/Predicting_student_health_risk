@@ -19,9 +19,9 @@ async function generateHealthAdvice(childName, habits, prediction) {
   try {
     const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
-    const prompt = `You are a warm, professional child-health advisor speaking to a parent.
+    const prompt = `You are a warm, professional student-health advisor speaking to a teacher or parent.
 
-Child's Name: ${childName}
+Student's Name: ${childName}
 Predicted Health: ${prediction.result} (confidence ${prediction.confidence.toFixed(1)}%)
 Recent Habits:
 - Sleep: ${habits.sleepDuration} hours/night

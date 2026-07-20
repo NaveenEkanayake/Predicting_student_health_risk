@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
-import { Activity, Mail, Lock, User, Eye, EyeOff, Heart, Sparkles } from 'lucide-react';
+import { Activity, Mail, Lock, User, Eye, EyeOff, Heart, Sparkles, CheckCircle, AlertTriangle, AlertCircle } from 'lucide-react';
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -71,8 +71,8 @@ export default function LoginPage() {
             </h2>
             <p className="text-gray-500 mb-8 text-sm">
               {isLogin
-                ? 'Sign in to monitor your children\'s health'
-                : 'Register to start tracking student wellness'}
+                ? 'Sign in as a Teacher or Parent to monitor student health'
+                : 'Register as a Teacher or Parent to start tracking student wellness'}
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -180,23 +180,26 @@ export default function LoginPage() {
           </h2>
 
           <p className="text-white/70 text-lg leading-relaxed mb-12">
-            Monitor and predict your children&apos;s health conditions using advanced machine learning.
+            Monitor and predict your students&apos; health conditions using advanced machine learning.
             Get AI-powered insights and personalized recommendations.
           </p>
 
           <div className="grid grid-cols-3 gap-3">
             {[
-              { label: 'At-Risk', color: 'from-red-400 to-red-500', emoji: '🚨' },
-              { label: 'Unhealthy', color: 'from-amber-400 to-amber-500', emoji: '⚠️' },
-              { label: 'Fit', color: 'from-green-400 to-green-500', emoji: '✅' },
-            ].map((item) => (
-              <div key={item.label}
-                className={`bg-gradient-to-b ${item.color} bg-opacity-80 backdrop-blur-sm rounded-2xl p-5 border border-white/10
-                  hover:scale-105 hover:shadow-2xl transition-all duration-300 cursor-default`}>
-                <p className="text-2xl mb-1">{item.emoji}</p>
-                <p className="text-white font-bold text-sm">{item.label}</p>
-              </div>
-            ))}
+              { label: 'At-Risk', color: 'from-red-400 to-red-500', icon: AlertCircle },
+              { label: 'Unhealthy', color: 'from-amber-400 to-amber-500', icon: AlertTriangle },
+              { label: 'Fit', color: 'from-green-400 to-green-500', icon: CheckCircle },
+            ].map((item) => {
+              const Icon = item.icon;
+              return (
+                <div key={item.label}
+                  className={`bg-gradient-to-b ${item.color} bg-opacity-80 backdrop-blur-sm rounded-2xl p-4 border border-white/10 flex flex-col items-center justify-center
+                    hover:scale-105 hover:shadow-2xl transition-all duration-300 cursor-default`}>
+                  <Icon className="w-6 h-6 text-white mb-1.5" />
+                  <p className="text-white font-bold text-sm">{item.label}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

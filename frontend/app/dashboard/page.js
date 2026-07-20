@@ -5,7 +5,7 @@ import axios from 'axios';
 import PieChart from '../../components/PieChart';
 import {
   Users, Activity, TrendingUp, AlertTriangle, RefreshCw, BarChart3,
-  LayoutDashboard, Sparkles,
+  LayoutDashboard, Sparkles, CheckCircle2, AlertCircle,
 } from 'lucide-react';
 
 export default function DashboardOverview() {
@@ -25,10 +25,10 @@ export default function DashboardOverview() {
   useEffect(() => { fetchStats(); }, [fetchStats]);
 
   const cards = [
-    { label: 'Total Children', value: stats?.totalChildren || 0, icon: Users, color: 'text-indigo-600', bg: 'from-indigo-500/10 to-indigo-600/5', shadow: 'shadow-indigo-500/10', border: 'border-indigo-200/50' },
-    { label: 'With Predictions', value: stats?.childrenWithPredictions || 0, icon: BarChart3, color: 'text-purple-600', bg: 'from-purple-500/10 to-purple-600/5', shadow: 'shadow-purple-500/10', border: 'border-purple-200/50' },
+    { label: 'Total Students', value: stats?.totalChildren || 0, icon: Users, color: 'text-indigo-600', bg: 'from-indigo-500/10 to-indigo-600/5', shadow: 'shadow-indigo-500/10', border: 'border-indigo-200/50' },
+    { label: 'Students with Predictions', value: stats?.childrenWithPredictions || 0, icon: BarChart3, color: 'text-purple-600', bg: 'from-purple-500/10 to-purple-600/5', shadow: 'shadow-purple-500/10', border: 'border-purple-200/50' },
     { label: 'Total Predictions', value: stats?.totalPredictions || 0, icon: Activity, color: 'text-emerald-600', bg: 'from-emerald-500/10 to-emerald-600/5', shadow: 'shadow-emerald-500/10', border: 'border-emerald-200/50' },
-    { label: 'At-Risk Children', value: stats?.predictionDistribution?.['At-Risk'] || 0, icon: AlertTriangle, color: 'text-red-600', bg: 'from-red-500/10 to-red-600/5', shadow: 'shadow-red-500/10', border: 'border-red-200/50' },
+    { label: 'At-Risk Students', value: stats?.predictionDistribution?.['At-Risk'] || 0, icon: AlertTriangle, color: 'text-red-600', bg: 'from-red-500/10 to-red-600/5', shadow: 'shadow-red-500/10', border: 'border-red-200/50' },
   ];
 
   const rateConfig = {
@@ -43,7 +43,7 @@ export default function DashboardOverview() {
         <BarChart3 className="w-10 h-10 text-indigo-400" />
       </div>
       <h3 className="text-xl font-bold text-gray-900 mb-2">No Data Yet</h3>
-      <p className="text-gray-500 max-w-sm mx-auto">Add children and run predictions to see health analytics here.</p>
+      <p className="text-gray-500 max-w-sm mx-auto">Add students and run predictions to see health analytics here.</p>
     </div>
   );
 
@@ -62,7 +62,7 @@ export default function DashboardOverview() {
               <span>Dashboard</span>
             </div>
             <h1 className="text-3xl lg:text-4xl font-extrabold text-white mb-2">Dashboard Overview</h1>
-            <p className="text-white/70 text-sm lg:text-base">Monitor your children&apos;s health predictions and analytics</p>
+            <p className="text-white/70 text-sm lg:text-base">Monitor your students&apos; health predictions and analytics</p>
           </div>
           <button onClick={fetchStats} disabled={loading}
             className="group flex items-center gap-2 px-5 py-3 rounded-xl bg-white/15 backdrop-blur-sm text-white font-medium text-sm
@@ -131,7 +131,7 @@ export default function DashboardOverview() {
                   </div>
                   <div>
                     <h2 className="text-lg font-bold text-gray-900">Health Distribution</h2>
-                    <p className="text-xs text-gray-400">Current state of all children</p>
+                    <p className="text-xs text-gray-400">Current state of all students</p>
                   </div>
                 </div>
                 <PieChart data={stats?.predictionDistribution} />
@@ -151,10 +151,11 @@ export default function DashboardOverview() {
 
                 <div className="space-y-4">
                   {[
-                    { label: 'Fit', key: 'Fit', emoji: '🌟' },
-                    { label: 'Unhealthy', key: 'Unhealthy', emoji: '📊' },
-                    { label: 'At-Risk', key: 'At-Risk', emoji: '🔴' },
+                    { label: 'Fit', key: 'Fit', icon: CheckCircle2 },
+                    { label: 'Unhealthy', key: 'Unhealthy', icon: AlertTriangle },
+                    { label: 'At-Risk', key: 'At-Risk', icon: AlertCircle },
                   ].map((item, idx) => {
+                    const Icon = item.icon;
                     const val = stats?.predictionDistribution?.[item.key] || 0;
                     const total = stats?.childrenWithPredictions || 1;
                     const pct = total > 0 ? ((val / total) * 100).toFixed(0) : 0;
@@ -164,12 +165,12 @@ export default function DashboardOverview() {
                         style={{ animationDelay: `${idx * 0.08}s` }}>
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-2">
-                            <span className="text-lg">{item.emoji}</span>
+                            <Icon className={`w-4 h-4 ${rc.text}`} />
                             <span className={`font-bold text-sm ${rc.text}`}>{item.label}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <span className="text-gray-900 font-extrabold text-lg">{val}</span>
-                            <span className="text-gray-400 text-xs">children</span>
+                            <span className="text-gray-400 text-xs">students</span>
                           </div>
                         </div>
                         <div className="w-full h-3 bg-white/60 rounded-full overflow-hidden shadow-inner">
@@ -177,7 +178,7 @@ export default function DashboardOverview() {
                             style={{ width: `${pct}%` }} />
                         </div>
                         <p className="text-xs text-gray-400 mt-1.5 font-medium">
-                          <span className={rc.text}>{pct}%</span> of predicted children
+                          <span className={rc.text}>{pct}%</span> of predicted students
                         </p>
                       </div>
                     );
